@@ -80,8 +80,8 @@ class TestBank(unittest.TestCase):
                         lastname='Einstein',
                         balance=500.0)
         )
-        ehrenfest = bank.open_account(
-            app.Account(number=2,
+        ehrenfest = bank.open_account\
+            (app.Account(number=2,
                         firstname='Paul',
                         lastname='Ehrenfest')
         )

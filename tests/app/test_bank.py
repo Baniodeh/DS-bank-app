@@ -89,7 +89,9 @@ class TestBank(unittest.TestCase):
         transaction = bank.add_transaction(sender=einstein,
                                            recipient=ehrenfest,
                                            subject='Bücher',
-                                           amount=100.0)
+                                           amount=100.0,
+                                           transaction_id=1,
+                                           category='test')
 
         self.assertEqual(len(bank.transactions), 1)
         self.assertEqual(bank.transactions, [transaction])
@@ -115,14 +117,18 @@ class TestBank(unittest.TestCase):
             bank.add_transaction(sender=einstein,
                                  recipient=ehrenfest,
                                  subject='Bücher',
-                                 amount=0.0)
+                                 amount=0.0,
+                                 transaction_id=1,
+                                 category='test')
 
         message = 'Amount needs to be greater than 0'
         with self.assertRaisesRegex(AssertionError, message):
             bank.add_transaction(sender=einstein,
                                  recipient=ehrenfest,
                                  subject='Bücher',
-                                 amount=-100.0)
+                                 amount=-100.0,
+                                 transaction_id=1,
+                                 category='test')
 
         # No transaction is saved
         self.assertEqual(bank.transactions, [])
@@ -153,7 +159,9 @@ class TestBank(unittest.TestCase):
             bank.add_transaction(sender=einstein,
                                  recipient=ehrenfest,
                                  subject='Bücher',
-                                 amount=100.0)
+                                 amount=100.0,
+                                 transaction_id=1,
+                                 category='test')
 
     def test_add_transaction_with_invalid_recipient(self):
         bank = app.Bank('GLS')
@@ -181,82 +189,90 @@ class TestBank(unittest.TestCase):
             bank.add_transaction(sender=einstein,
                                  recipient=ehrenfest,
                                  subject='Bücher',
-                                 amount=100.0)
+                                 amount=100.0,
+                                 transaction_id=1,
+                                 category='test')
 
     # Extra Task
-    # def test_add_transaction_changes_sender_balance(self):
-    #     bank = app.Bank('GLS')
-    #     self.assertEqual(bank.transactions, [])
+    def test_add_transaction_changes_sender_balance(self):
+        bank = app.Bank('GLS')
+        self.assertEqual(bank.transactions, [])
+
+        einstein = bank.open_account(
+            app.Account(number=1,
+                        firstname='Albert',
+                        lastname='Einstein',
+                        balance=500.0)
+        )
+        ehrenfest = bank.open_account(
+            app.Account(number=2,
+                        firstname='Paul',
+                        lastname='Ehrenfest')
+        )
+
+        transaction = bank.add_transaction(sender=einstein,
+                                           recipient=ehrenfest,
+                                           subject='Bücher',
+                                           amount=100.0,
+                                           transaction_id=1,
+                                           category='test')
+
+        self.assertEqual(einstein.balance, 400.0)
+        self.assertEqual(len(bank.transactions), 1)
+        self.assertEqual(bank.transactions, [transaction])
     #
-    #     einstein = bank.open_account(
-    #         app.Account(number=1,
-    #                     firstname='Albert',
-    #                     lastname='Einstein',
-    #                     balance=500.0)
-    #     )
-    #     ehrenfest = bank.open_account(
-    #         app.Account(number=2,
-    #                     firstname='Paul',
-    #                     lastname='Ehrenfest')
-    #     )
+    def test_add_transaction_changes_recipient_balance(self):
+        bank = app.Bank('GLS')
+        self.assertEqual(bank.transactions, [])
+
+        einstein = bank.open_account(
+            app.Account(number=1,
+                        firstname='Albert',
+                        lastname='Einstein',
+                        balance=500.0)
+        )
+        ehrenfest = bank.open_account(
+            app.Account(number=2,
+                        firstname='Paul',
+                        lastname='Ehrenfest')
+        )
+
+        transaction = bank.add_transaction(sender=einstein,
+                                           recipient=ehrenfest,
+                                           subject='Bücher',
+                                           amount=100.0,
+                                           transaction_id= 1,
+                                           category= 'test')
+
+        self.assertEqual(ehrenfest.balance, 100.0)
+        self.assertEqual(len(bank.transactions), 1)
+        self.assertEqual(bank.transactions, [transaction])
     #
-    #     transaction = bank.add_transaction(sender=einstein,
-    #                                        recipient=ehrenfest,
-    #                                        subject='Bücher',
-    #                                        amount=100.0)
-    #
-    #     self.assertEqual(einstein.balance, 400.0)
-    #     self.assertEqual(len(bank.transactions), 1)
-    #     self.assertEqual(bank.transactions, [transaction])
-    #
-    # def test_add_transaction_changes_recipient_balance(self):
-    #     bank = app.Bank('GLS')
-    #     self.assertEqual(bank.transactions, [])
-    #
-    #     einstein = bank.open_account(
-    #         app.Account(number=1,
-    #                     firstname='Albert',
-    #                     lastname='Einstein',
-    #                     balance=500.0)
-    #     )
-    #     ehrenfest = bank.open_account(
-    #         app.Account(number=2,
-    #                     firstname='Paul',
-    #                     lastname='Ehrenfest')
-    #     )
-    #
-    #     transaction = bank.add_transaction(sender=einstein,
-    #                                        recipient=ehrenfest,
-    #                                        subject='Bücher',
-    #                                        amount=100.0)
-    #
-    #     self.assertEqual(ehrenfest.balance, 100.0)
-    #     self.assertEqual(len(bank.transactions), 1)
-    #     self.assertEqual(bank.transactions, [transaction])
-    #
-    # def test_add_transaction_with_insufficient_funds(self):
-    #     bank = app.Bank('GLS')
-    #     self.assertEqual(bank.transactions, [])
-    #
-    #     einstein = bank.open_account(
-    #         app.Account(number=1,
-    #                     firstname='Albert',
-    #                     lastname='Einstein',
-    #                     balance=50.0)
-    #     )
-    #     ehrenfest = bank.open_account(
-    #         app.Account(number=2,
-    #                     firstname='Paul',
-    #                     lastname='Ehrenfest')
-    #     )
-    #
-    #     message = 'Account has not enough funds'
-    #     with self.assertRaisesRegex(AssertionError, message):
-    #         bank.add_transaction(sender=einstein,
-    #                              recipient=ehrenfest,
-    #                              subject='Bücher',
-    #                              amount=100.0)
-    #
-    #     self.assertEqual(einstein.balance, 50.0)
-    #     self.assertEqual(ehrenfest.balance, 0.0)
-    #     self.assertEqual(bank.transactions, [])
+    def test_add_transaction_with_insufficient_funds(self):
+        bank = app.Bank('GLS')
+        self.assertEqual(bank.transactions, [])
+
+        einstein = bank.open_account(
+            app.Account(number=1,
+                        firstname='Albert',
+                        lastname='Einstein',
+                        balance=50.0)
+        )
+        ehrenfest = bank.open_account(
+            app.Account(number=2,
+                        firstname='Paul',
+                        lastname='Ehrenfest')
+        )
+
+        message = 'Account has not enough funds'
+        with self.assertRaisesRegex(AssertionError, message):
+            bank.add_transaction(sender=einstein,
+                                 recipient=ehrenfest,
+                                 subject='Bücher',
+                                 amount=100.0,
+                                 transaction_id=1010,
+                                 category= 'test')
+
+        self.assertEqual(einstein.balance, 50.0)
+        self.assertEqual(ehrenfest.balance, 0.0)
+        self.assertEqual(bank.transactions, [])

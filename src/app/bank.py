@@ -14,10 +14,22 @@ class Bank:
             self.accounts[account.number] = account
             return account
 
-    def add_transaction(self, *, sender, recipient, subject, amount):
-         assert sender.number in self.accounts, 'Sender has no account yet!'
-         assert recipient.number in self.accounts, 'Recipient has no account yet!'
-         assert amount > 0, 'Amount needs to be greater than 0'
-         transaction = Transaction(sender=sender.number, recipient=recipient.number, subject=subject, amount=amount)
-         self.transactions.append(transaction)
-         return transaction
+    def add_transaction(self, *, sender, recipient, subject, amount, transaction_id, category):
+        assert sender.number in self.accounts, 'Sender has no account yet!'
+        assert recipient.number in self.accounts, 'Recipient has no account yet!'
+        assert amount > 0, 'Amount needs to be greater than 0'
+
+        sender.subtract_from_balance(amount)
+        recipient.add_to_balance(amount)
+
+        transaction = Transaction(sender=sender.number,
+                                  recipient=recipient.number,
+                                  subject=subject,
+                                  amount=amount,
+                                  transaction_id= transaction_id,
+                                  category= category)
+
+        self.transactions.append(transaction)
+        return transaction
+
+
